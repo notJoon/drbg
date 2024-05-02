@@ -42,7 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	bs, err := stream.ReadHexFromFile(*filename)
+	bs, err := stream.FromFile(*filename)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)

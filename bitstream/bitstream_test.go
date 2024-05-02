@@ -132,3 +132,67 @@ func TestBitStream(t *testing.T) {
 		})
 	}
 }
+
+func TestBit(t *testing.T) {
+	tests := []struct {
+		name     string
+		data     []byte
+		index    int
+		expected byte
+		err      error
+	}{
+		{
+			name:     "All zeros",
+			data:     []byte{0x00, 0x00}, // 00000000 00000000
+			index:    0,
+			expected: 0,
+			err:      nil,
+		},
+		{
+			name:     "All ones",
+			data:     []byte{0xff, 0xff}, // 11111111 11111111
+			index:    7,
+			expected: 1,
+			err:      nil,
+		},
+		{
+			name:     "Mixed pattern",
+			data:     []byte{0xaa, 0x55}, // 10101010 01010101
+			index:    8,
+			expected: 0,
+			err:      nil,
+		},
+		{
+			name:     "Mixed pattern",
+			data:     []byte{0xaa, 0x55}, // 10101010 01010101
+			index:    9,
+			expected: 1,
+			err:      nil,
+		},
+		{
+			name:     "Index out of range - negative",
+			data:     []byte{0x00},
+			index:    -1,
+			expected: 0,
+			err:      ErrOutOfRange,
+		},
+		{
+			name:     "Index out of range - too large",
+			data:     []byte{0x00, 0x00},
+			index:    16,
+			expected: 0,
+			err:      ErrOutOfRange,
+		},
+	}
+
+	for _, tt := range tests {
+		bs := NewBitStream(tt.data)
+		result, err := bs.Bit(tt.index)
+		if err != tt.err {
+			t.Errorf("%s: expected error %v, got %v", tt.name, tt.err, err)
+		}
+		if result != tt.expected {
+			t.Errorf("%s: expected result %d, got %d", tt.name, tt.expected, result)
+		}
+	}
+}

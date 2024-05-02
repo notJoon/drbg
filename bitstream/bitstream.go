@@ -105,23 +105,17 @@ func FromFile(filename string) (*BitStream, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if num, err := strconv.Atoi(line); err == nil {
-			// assuming each number fits within 16 bits
-			data = append(data, byte(num>>8), byte(num&0xff))
+			if num <= 0xff {
+				data = append(data, byte(num))
+			} else {
+				data = append(data, byte(num>>8), byte(num&0xff))
+			}
 		} else {
 			return nil, err
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	return NewBitStream(data), nil
-}
-
-func ReadHexFromFile(filename string) (*BitStream, error) {
-	data, err := os.ReadFile(filename)
-	if err != nil {
 		return nil, err
 	}
 

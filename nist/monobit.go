@@ -2,6 +2,7 @@ package nist
 
 import (
 	"errors"
+	"fmt"
 	"math"
 
 	b "github.com/notJoon/drbg/bitstream"
@@ -17,6 +18,9 @@ func FrequencyTest(bs *b.BitStream) (float64, bool, error) {
 		return 0, false, ErrEmptyBitStream
 	}
 
+	zeros := 0
+	ones := 0
+
 	var S_n int64 = 0
 	for i := 0; i < n; i++ {
 		bit, err := bs.Bit(i)
@@ -24,11 +28,15 @@ func FrequencyTest(bs *b.BitStream) (float64, bool, error) {
 			return 0, false, err
 		}
 		if bit == 0 {
+			zeros += 1
 			S_n -= 1
 		} else {
+			ones += 1
 			S_n += 1
 		}
 	}
+
+	fmt.Printf("Zeros: %d, Ones: %d\n", zeros, ones)
 
 	S_obs := math.Abs(float64(S_n)) / math.Sqrt(float64(n))
 	P_value := math.Erfc(S_obs / math.Sqrt(2))
