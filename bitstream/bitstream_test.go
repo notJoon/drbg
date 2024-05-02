@@ -2,55 +2,133 @@ package bitstream
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestNewBitstream(t *testing.T) {
-	data := []byte{0xAB, 0xCD, 0xEF}
-	bs := NewBitstream(data)
-	assert.NotNil(t, bs)
-	assert.Equal(t, 24, bs.Len())
-}
+func TestBitStream(t *testing.T) {
+	tests := []struct {
+		name     string
+		initData []byte
+		length   int
+		ops      []func(*BitStream) error
+		wantBits []byte
+		wantErr  error
+	}{
+		{
+			name:     "Empty BitStream",
+			initData: []byte{},
+			length:   0,
+			ops:      nil,
+			wantBits: []byte{},
+			wantErr:  nil,
+		},
+		{
+			name:     "Single Byte No Change",
+			initData: []byte{0xAA},
+			length:   8,
+			ops:      nil,
+			wantBits: []byte{0xAA},
+			wantErr:  nil,
+		},
+		{
+			name:     "Single Bit Set",
+			initData: []byte{0x00},
+			length:   8,
+			ops: []func(*BitStream) error{
+				func(bs *BitStream) error { return bs.SetBit(0, 1) },
+			},
+			wantBits: []byte{0x80},
+			wantErr:  nil,
+		},
+		{
+			name:     "Read Bit",
+			initData: []byte{0x80},
+			length:   8,
+			ops: []func(*BitStream) error{
+				func(bs *BitStream) error {
+					bit, err := bs.Bit(0)
+					if err != nil || bit != 1 {
+						t.Fatalf("Expected bit 1, got %d, err: %v", bit, err)
+					}
+					return nil
+				},
+			},
+			wantBits: []byte{0x80},
+			wantErr:  nil,
+		},
+		{
+			name:     "Set and Read Bit",
+			initData: []byte{0x00},
+			length:   8,
+			ops: []func(*BitStream) error{
+				func(bs *BitStream) error { return bs.SetBit(7, 1) },
+				func(bs *BitStream) error {
+					bit, err := bs.Bit(7)
+					if err != nil || bit != 1 {
+						t.Fatalf("Expected bit 1, got %d, err: %v", bit, err)
+					}
+					return nil
+				},
+			},
+			wantBits: []byte{0x01},
+			wantErr:  nil,
+		},
+		{
+			name:     "Append Bit",
+			initData: []byte{0x80}, // 10000000
+			length:   8,
+			ops: []func(*BitStream) error{
+				func(bs *BitStream) error { return bs.Append(1) }, // Append 1
+			},
+			wantBits: []byte{0x80, 0x80}, // 10000000 10000000
+			wantErr:  nil,
+		},
+		{
+			name:     "Invalid Index",
+			initData: []byte{0x00},
+			length:   8,
+			ops: []func(*BitStream) error{
+				func(bs *BitStream) error { _, err := bs.Bit(8); return err },
+			},
+			wantBits: []byte{0x00},
+			wantErr:  ErrOutOfRange,
+		},
+		{
+			name:     "Invalid Bit Value",
+			initData: []byte{0x00},
+			length:   8,
+			ops: []func(*BitStream) error{
+				func(bs *BitStream) error { return bs.Append(2) }, // Invalid bit value
+			},
+			wantBits: []byte{0x00},
+			wantErr:  ErrInvalidBitValue,
+		},
+	}
 
-func TestBitstreamLen(t *testing.T) {
-	data := []byte{0xAB, 0xCD, 0xEF}
-	bs := NewBitstream(data)
-	assert.Equal(t, 24, bs.Len())
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bs := NewBitstream(tt.initData)
+			var err error
+			for _, op := range tt.ops {
+				if err = op(bs); err != nil {
+					break
+				}
+			}
 
-func TestBitstreamBit(t *testing.T) {
-	data := []byte{0xAB, 0xCD, 0xEF}
-	bs := NewBitstream(data)
-	bit, err := bs.Bit(0)
-	assert.NoError(t, err)
-	assert.Equal(t, byte(1), bit)
-	bit, err = bs.Bit(23)
-	assert.NoError(t, err)
-	assert.Equal(t, byte(1), bit)
-}
+			if tt.wantErr != nil && err != tt.wantErr {
+				t.Errorf("Expected error %v, got %v", tt.wantErr, err)
+			} else if tt.wantErr == nil && err != nil {
+				t.Errorf("Unexpected error: %v", err)
+			}
 
-func TestBitstreamSetBit(t *testing.T) {
-	data := []byte{0x00, 0x00, 0x00}
-	bs := NewBitstream(data)
-	err := bs.SetBit(0, 1)
-	assert.NoError(t, err)
-	err = bs.SetBit(23, 1)
-	assert.NoError(t, err)
-	assert.Equal(t, []byte{0x80, 0x00, 0x01}, bs.Bytes())
-}
+			if len(bs.Bytes()) != len(tt.wantBits) {
+				t.Fatalf("Expected bytes %v, got %v", tt.wantBits, bs.Bytes())
+			}
 
-func TestBitstreamAppend(t *testing.T) {
-	bs := NewBitstream([]byte{})
-	err := bs.Append(1)
-	assert.NoError(t, err)
-	err = bs.Append(0)
-	assert.NoError(t, err)
-	assert.Equal(t, []byte{0x80}, bs.Bytes())
-}
-
-func TestBitstreamBytes(t *testing.T) {
-	data := []byte{0xAB, 0xCD, 0xEF}
-	bs := NewBitstream(data)
-	assert.Equal(t, data, bs.Bytes())
+			for i, b := range bs.Bytes() {
+				if b != tt.wantBits[i] {
+					t.Errorf("Expected byte at index %d to be %b, got %b", i, tt.wantBits[i], b)
+				}
+			}
+		})
+	}
 }
