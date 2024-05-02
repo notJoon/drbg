@@ -3,7 +3,8 @@ package bitstream
 import "errors"
 
 const (
-	bitSize = 8
+	bitSize  = 8
+	msbIndex = bitSize - 1
 )
 
 var (
@@ -35,7 +36,7 @@ func (bs *BitStream) Bit(index int) (byte, error) {
 	}
 
 	byteIndex, bitIndex := getIndexes(index)
-	return (bs.data[byteIndex] >> uint(7-bitIndex)) & 1, nil
+	return (bs.data[byteIndex] >> uint(msbIndex-bitIndex)) & 1, nil
 }
 
 // SetBit sets the bit value at the specified index.
@@ -46,7 +47,7 @@ func (bs *BitStream) SetBit(index int, bit byte) error {
 	}
 
 	byteIndex, bitIndex := getIndexes(index)
-	mask := byte(1 << uint(7-bitIndex))
+	mask := byte(1 << uint(msbIndex-bitIndex))
 	if bit == 1 {
 		bs.data[byteIndex] |= mask
 	} else {
@@ -68,7 +69,7 @@ func (bs *BitStream) Append(bit byte) error {
 	}
 
 	if bit == 1 {
-		bs.data[byteIndex] |= 1 << uint(7-bitIndex)
+		bs.data[byteIndex] |= 1 << uint(msbIndex-bitIndex)
 	}
 
 	bs.len++

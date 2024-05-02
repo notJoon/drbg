@@ -24,11 +24,11 @@ func (r *BitStreamReader) Read(n int) ([]byte, error) {
 		return nil, ErrNotEnoughBits
 	}
 
-	data := make([]byte, (n+7)/bitSize)
+	data := make([]byte, (n+msbIndex)/bitSize)
 	bitcount := 0
 	for i := 0; i < n; i++ {
 		bit, _ := r.bs.Bit(r.offset + i)
-		data[bitcount/bitSize] |= bit << uint(7-bitcount%bitSize)
+		data[bitcount/bitSize] |= bit << uint(msbIndex-bitcount%bitSize)
 		bitcount++
 	}
 	r.offset += n

@@ -16,7 +16,7 @@ func NewBitStreamWriter(bs *BitStream) *BitStreamWriter {
 // Each byte is written as 8 individual bits.
 func (w *BitStreamWriter) Write(bits []byte) error {
 	for _, b := range bits {
-		for i := 7; i >= 0; i-- {
+		for i := msbIndex; i >= 0; i-- {
 			bit := (b >> i) & 1
 			w.data = append(w.data, bit)
 			w.len++
