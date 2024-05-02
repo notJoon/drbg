@@ -106,7 +106,7 @@ func TestBitStream(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bs := NewBitstream(tt.initData)
+			bs := NewBitStream(tt.initData)
 			var err error
 			for _, op := range tt.ops {
 				if err = op(bs); err != nil {

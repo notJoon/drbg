@@ -102,7 +102,7 @@ func TestBitStreamReader(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bs := NewBitstream(tt.initData)
+			bs := NewBitStream(tt.initData)
 			reader := NewBitStreamReader(bs)
 			for i, op := range tt.readOps {
 				result, err := op(reader)

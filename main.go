@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	stream "github.com/notJoon/drbg/bitstream"
+	nist "github.com/notJoon/drbg/nist"
 )
 
 func main() {
@@ -24,9 +27,9 @@ func main() {
 	// cusum := flag.Bool("cusum", false, "Run Cumulative Sums (Cusums) Test")
 	// randomExcursions := flag.Bool("random-excursions", false, "Run Random Excursions Test")
 	// randomExcursionsVariant := flag.Bool("random-excursions-variant", false, "Run Random Excursions Variant Test")
+	filename := flag.String("file", "", "File containing the random bits")
 	verbose := flag.Bool("verbose", false, "Enable verbose output")
 	help := flag.Bool("help", false, "Show help message")
-
 	flag.Parse()
 
 	if *help {
@@ -34,18 +37,34 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *filename == "" {
+		fmt.Println("Error: No file specified")
+		os.Exit(1)
+	}
+
+	bs, err := stream.ReadHexFromFile(*filename)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		os.Exit(1)
+	}
+
 	if *allTests || *frequency {
 		fmt.Println("Running Frequency (Monobit) Test...")
-		// TODO: Frequency (Monobit) Test 실행
+		p_val, isRandom, err := nist.FrequencyTest(bs)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("p-value: ", p_val)
+		fmt.Println("Is random: ", isRandom)
 	}
 	if *allTests || *blockFrequency {
 		fmt.Println("Running Frequency Test within a Block...")
-		// TODO: Frequency Test within a Block 실행
+		// TODO: Frequency Test within a Block
 	}
-	// ... 나머지 테스트 실행 ...
 
 	if *verbose {
 		fmt.Println("Verbose output enabled")
-		// TODO: 상세 출력 구현
+		// TODO: detailed output
 	}
 }

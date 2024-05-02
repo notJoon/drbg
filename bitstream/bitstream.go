@@ -1,6 +1,11 @@
 package bitstream
 
-import "errors"
+import (
+	"bufio"
+	"errors"
+	"os"
+	"strconv"
+)
 
 const (
 	bitSize  = 8
@@ -18,8 +23,8 @@ type BitStream struct {
 	len  int    // number of bits in the bitstream (length of the byte slice * 8)
 }
 
-// NewBitstream creates a new Bitstream from the provided byte slice.
-func NewBitstream(data []byte) *BitStream {
+// NewBitStream creates a new Bitstream from the provided byte slice.
+func NewBitStream(data []byte) *BitStream {
 	return &BitStream{data: data, len: len(data) * bitSize}
 }
 
@@ -85,4 +90,40 @@ func (bs *BitStream) Bytes() []byte {
 // for the given bit position in the bitsream.
 func getIndexes(index int) (byteInex, bitIndex int) {
 	return index / bitSize, index % bitSize
+}
+
+// FromFile reads a file containing a list of numbers and returns a Bitstream.
+func FromFile(filename string) (*BitStream, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var data []byte
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if num, err := strconv.Atoi(line); err == nil {
+			// assuming each number fits within 16 bits
+			data = append(data, byte(num>>8), byte(num&0xff))
+		} else {
+			return nil, err
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return NewBitStream(data), nil
+}
+
+func ReadHexFromFile(filename string) (*BitStream, error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewBitStream(data), nil
 }
