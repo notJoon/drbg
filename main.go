@@ -16,7 +16,7 @@ func main() {
 	allTests := flag.Bool("all", false, "Run all tests")
 	frequency := flag.Bool("frequency", false, "Run Frequency (Monobit) Test")
 	blockFrequency := flag.Bool("block", false, "Run Frequency Test within a Block")
-	// runs := flag.Bool("runs", false, "Run Runs Test")
+	runs := flag.Bool("runs", false, "Run Runs Test")
 	// longestRun := flag.Bool("longest-run", false, "Run Test for the Longest Run of Ones in a Block")
 	// rank := flag.Bool("rank", false, "Run Binary Matrix Rank Test")
 	// dft := flag.Bool("dft", false, "Run Discrete Fourier Transform (Spectral) Test")
@@ -63,6 +63,17 @@ func main() {
 	if *allTests || *blockFrequency {
 		fmt.Println("Running Frequency Test within a Block...")
 		p_val, isRandom, err := nist.BlockFrequencyTest(bs, 128)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("p-value: ", p_val)
+		fmt.Println("Is random: ", isRandom)
+	}
+
+	if *allTests || *runs {
+		fmt.Println("Running Runs Test...")
+		p_val, isRandom, err := nist.Runs(bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)

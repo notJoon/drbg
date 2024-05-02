@@ -13,6 +13,9 @@ var (
 	ErrInvalidBlockSize = errors.New("invalid block size M")
 )
 
+// piWithBaseI calculates the proportion πi of '1's in each M-bit block of the bitstream.
+// It returns a slice of float64 representing the proportion of '1's for each block
+// and an error if an issue occurs during bit extraction.
 func piWithBaseI(bs *b.BitStream, M, N uint64) ([]float64, error) {
 	var sum uint64
 	var ret = []float64{}
@@ -30,6 +33,9 @@ func piWithBaseI(bs *b.BitStream, M, N uint64) ([]float64, error) {
 	return ret, nil
 }
 
+// BlockFrequencyTest performs the Frequency Test Within a Block as defined in NIST SP800-22.
+// It takes a BitStream and block size M as input and returns the P-value of the test,
+// a bool representing if the P-value suggests randomness (true if P >= 0.01), and an error if any.
 func BlockFrequencyTest(bs *b.BitStream, M uint64) (float64, bool, error) {
 	n := uint64(bs.Len())
 	if n < 100 {
@@ -55,7 +61,7 @@ func BlockFrequencyTest(bs *b.BitStream, M uint64) (float64, bool, error) {
 	}
 	X2 := 4 * float64(M) * tempSum
 
-	// compute the P-value
+	// compute the P-value using the incomplete gamma function complement
 	P_value := igamc(float64(N)/2.0, X2/2.0)
 
 	return P_value, P_value >= 0.01, nil

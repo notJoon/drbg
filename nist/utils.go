@@ -2,12 +2,15 @@ package nist
 
 import "math"
 
-var epsilon []uint8
-
 var (
+	// MAXLOG is the maximum log value to prevent underflow.
 	MAXLOG float64 = 7.09782712893383996732e2
-	big    float64 = 4.503599627370496e15
+	// big is a large number used to stabilize the computation of the continued fraction.
+	big float64 = 4.503599627370496e15
+	// biginv is the inverse of 'big', used to rescale variables in the continued fraction.
 	biginv float64 = 2.22044604925031308085e-16
+	// MACHEP is the machine epsilon, which is the smallest number such that
+	// 1.0 + MACHEP > 1.0. It is used as a convergence criterion.
 	MACHEP float64 = 1.38777878078144567553e-17
 )
 
