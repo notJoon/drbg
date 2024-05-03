@@ -7,16 +7,15 @@ import (
 
 	stream "github.com/notJoon/drbg/bitstream"
 	nist "github.com/notJoon/drbg/nist"
+
+	"github.com/jedib0t/go-pretty/table"
 )
 
 // TODO: pretty print options with detailed output
 
 func main() {
-	fmt.Println("NIST Statistical Test Suite")
-	fmt.Println("=====================================")
-	fmt.Println("")
-
 	allTests := flag.Bool("all", false, "Run all tests")
+
 	frequency := flag.Bool("frequency", false, "Run Frequency (Monobit) Test")
 	blockFrequency := flag.Bool("block", false, "Run Frequency Test within a Block")
 	runs := flag.Bool("runs", false, "Run Runs Test")
@@ -38,12 +37,12 @@ func main() {
 	// cusum := flag.Bool("cusum", false, "Run Cumulative Sums (Cusums) Test")
 	// randomExcursions := flag.Bool("random-excursions", false, "Run Random Excursions Test")
 	// randomExcursionsVariant := flag.Bool("random-excursions-variant", false, "Run Random Excursions Variant Test")
+
 	filename := flag.String("file", "", "File containing the random bits")
 	verbose := flag.Bool("verbose", false, "Enable verbose output")
 	help := flag.Bool("help", false, "Show help message")
 	flag.Parse()
 
-	pass, fail := 0, 0
 	if *help {
 		flag.Usage()
 		os.Exit(0)
@@ -60,105 +59,107 @@ func main() {
 		os.Exit(1)
 	}
 
+	// test result counters
+	pass, fail := 0, 0
+
+	// Draw table for test results
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"NIST Statistical Test Suite", "p-value", "Result"})
+
 	if *allTests || *frequency {
-		fmt.Println("Running Frequency (Monobit) Test...")
 		p_val, isRandom, err := nist.FrequencyTest(bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("p-value: ", p_val)
-		fmt.Println("Is random: ", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Frequency (Monobit) Test", p_val, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Frequency (Monobit) Test", p_val, "Fail"})
 		}
-		fmt.Println("")
 	}
 	if *allTests || *blockFrequency {
-		fmt.Println("Running Frequency Test within a Block...")
 		p_val, isRandom, err := nist.BlockFrequencyTest(bs, 128)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("p-value: ", p_val)
-		fmt.Println("Is random: ", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Frequency Test within a Block", p_val, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Frequency Test within a Block", p_val, "Fail"})
 		}
-		fmt.Println("")
 	}
 
 	if *allTests || *runs {
-		fmt.Println("Running Runs Test...")
 		p_val, isRandom, err := nist.Runs(bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("p-value: ", p_val)
-		fmt.Println("Is random: ", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Runs Test", p_val, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Runs Test", p_val, "Fail"})
 		}
-		fmt.Println("")
 	}
 
 	if *allTests || *longestRun {
-		fmt.Println("Running Test for the Longest Run of Ones in a Block...")
 		p_val, isRandom, err := nist.LongestRunOfOnes(bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("p-value: ", p_val)
-		fmt.Println("Is random: ", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Test for the Longest Run of Ones in a Block", p_val, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Test for the Longest Run of Ones in a Block", p_val, "Fail"})
 		}
-		fmt.Println("")
 	}
 
 	if *allTests || *rank {
-		fmt.Println("Running Binary Matrix Rank Test...")
 		p_val, isRandom, err := nist.Rank(bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("p-value: ", p_val)
-		fmt.Println("Is random: ", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Binary Matrix Rank Test", p_val, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Binary Matrix Rank Test", p_val, "Fail"})
 		}
-		fmt.Println("")
 	}
 
 	if *allTests || *dft {
-		fmt.Println("Running Discrete Fourier Transform (Spectral) Test...")
 		p_val, isRandom, err := nist.DFT(bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println("p-value: ", p_val)
-		fmt.Println("Is random: ", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Discrete Fourier Transform (Spectral) Test", p_val, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Discrete Fourier Transform (Spectral) Test", p_val, "Fail"})
 		}
-		fmt.Println("")
 	}
 
 	if *allTests || *nonOverlappingTemplate {
@@ -170,7 +171,6 @@ func main() {
 			fmt.Println("Error: block size is required for Non-overlapping Template Matching Test.\nUse -block-size 10 (or other block size)")
 			os.Exit(1)
 		}
-		fmt.Println("Running Non-overlapping Template Matching Test...")
 		B := make([]uint8, len(*templateB))
 		for i, c := range *templateB {
 			switch c {
@@ -188,14 +188,14 @@ func main() {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("P-value: %f\n", p_value)
-		fmt.Printf("Is random? %v\n", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Non-overlapping Template Matching Test", p_value, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Non-overlapping Template Matching Test", p_value, "Fail"})
 		}
-		fmt.Println("")
 	}
 
 	if *allTests || *overlappingTemplate {
@@ -207,7 +207,6 @@ func main() {
 			fmt.Println("Error: block size is required for Non-overlapping Template Matching Test.\nUse -block-size 10 (or other block size)")
 			os.Exit(1)
 		}
-		fmt.Println("Running Non-overlapping Template Matching Test...")
 		B := make([]uint8, len(*templateB))
 		for i, c := range *templateB {
 			switch c {
@@ -225,14 +224,14 @@ func main() {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("P-value: %f\n", p_value)
-		fmt.Printf("Is random? %v\n", isRandom)
+
 		if isRandom {
-			pass += 1
+			pass++
+			t.AppendRow([]interface{}{"Overlapping Template Matching Test", p_value, "Pass"})
 		} else {
-			fail += 1
+			fail++
+			t.AppendRow([]interface{}{"Overlapping Template Matching Test", p_value, "Fail"})
 		}
-		fmt.Println("")
 	}
 
 	if *verbose {
@@ -240,8 +239,8 @@ func main() {
 		// TODO: detailed output
 	}
 
-	println("============= Results ===============")
-	fmt.Println("Total tests:  ", pass+fail)
-	fmt.Println("Tests passed: ", pass)
-	fmt.Println("Tests failed: ", fail)
+	t.AppendFooter(table.Row{"", "Total Tests", pass + fail})
+	t.AppendFooter(table.Row{"", "Pass", pass})
+	t.AppendFooter(table.Row{"", "Fail", fail})
+	t.Render()
 }
