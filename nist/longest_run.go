@@ -9,7 +9,7 @@ import (
 var (
 	ErrNotEnoughLength = errors.New("input length of sequence is too small (n < 128)")
 	ErrInvalidValueK   = errors.New("invalid value of K")
-	ErrInvalidValueM  = errors.New("invalid value of M")
+	ErrInvalidValueM   = errors.New("invalid value of M")
 )
 
 // LongestRunOfOnes implements the Longest Run test from NIST SP 800-22.
@@ -28,11 +28,13 @@ var (
 // and an error (if any occurred).
 func LongestRunOfOnes(bs *b.BitStream) (float64, bool, error) {
 	// Declare Constant
-	var _PI_K3_M8 = [4]float64{0.2148, 0.3672, 0.2305, 0.1875}
-	var _PI_K5_M128 = [6]float64{0.1174, 0.2430, 0.2493, 0.1752, 0.1027, 0.1124}
-	var _PI_K5_M512 = [6]float64{0.1170, 0.2460, 0.2523, 0.1755, 0.1027, 0.1124}
-	var _PI_K5_M1000 = [6]float64{0.1307, 0.2437, 0.2452, 0.1714, 0.1002, 0.1088}
-	var _PI_K6_M10000 = [7]float64{0.0882, 0.2092, 0.2483, 0.1933, 0.1208, 0.0675, 0.0727}
+	var (
+		_PI_K3_M8     = [4]float64{0.2148, 0.3672, 0.2305, 0.1875}
+		_PI_K5_M128   = [6]float64{0.1174, 0.2430, 0.2493, 0.1752, 0.1027, 0.1124}
+		_PI_K5_M512   = [6]float64{0.1170, 0.2460, 0.2523, 0.1755, 0.1027, 0.1124}
+		_PI_K5_M1000  = [6]float64{0.1307, 0.2437, 0.2452, 0.1714, 0.1002, 0.1088}
+		_PI_K6_M10000 = [7]float64{0.0882, 0.2092, 0.2483, 0.1933, 0.1208, 0.0675, 0.0727}
+	)
 
 	var M uint64 // The length of each block.
 	var N uint64 // The number of blocks; selected in accordance with the value of M.
