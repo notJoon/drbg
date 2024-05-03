@@ -18,7 +18,8 @@ var (
 // and an error if an issue occurs during bit extraction.
 func piWithBaseI(bs *b.BitStream, M, N uint64) ([]float64, error) {
 	var sum uint64
-	var ret = []float64{}
+	result := make([]float64, 0, N)
+
 	for i := uint64(1); i <= N; i++ {
 		sum = 0
 		for j := uint64(0); j < M; j++ {
@@ -28,9 +29,9 @@ func piWithBaseI(bs *b.BitStream, M, N uint64) ([]float64, error) {
 			}
 			sum += uint64(bit)
 		}
-		ret = append(ret, float64(sum)/float64(M))
+		result = append(result, float64(sum)/float64(M))
 	}
-	return ret, nil
+	return result, nil
 }
 
 // BlockFrequencyTest performs the Frequency Test Within a Block as defined in NIST SP800-22.
@@ -57,7 +58,8 @@ func BlockFrequencyTest(bs *b.BitStream, M uint64) (float64, bool, error) {
 	// compute the test statistic X^2
 	tempSum := 0.0
 	for _, value := range pi {
-		tempSum += (value - 0.5) * (value - 0.5)
+		diff := value - 0.5
+		tempSum += diff * diff
 	}
 	X2 := 4 * float64(M) * tempSum
 

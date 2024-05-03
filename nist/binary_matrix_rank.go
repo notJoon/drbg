@@ -148,8 +148,10 @@ Forward_STEP4:
 Backward_STEP_2:
 	if matrix[i][i] == 0 {
 		// swap all elements in the i-th row with all elements in the next row that contains a one in the i-th column
-		var tempIndex int
-		var isContained bool = false
+		var (
+			tempIndex   int
+			isContained bool
+		)
 		for tempIndex = i; tempIndex >= 0; tempIndex-- {
 			if matrix[tempIndex][i] == 1 {
 				matrix[i], matrix[tempIndex] = matrix[tempIndex], matrix[i]

@@ -60,8 +60,8 @@ func FrequencyTest(bs *b.BitStream) (float64, bool, error) {
 	}
 
 	S_obs := math.Abs(float64(S_n)) / math.Sqrt(float64(n))
-	P_value := math.Erfc(S_obs / math.Sqrt(2))
+	p_value := math.Erfc(S_obs / math.Sqrt(2))
 
-	isRandom := P_value >= 0.01
-	return P_value, isRandom, nil
+	isRandom := p_value >= 0.01
+	return p_value, isRandom, nil
 }
