@@ -19,7 +19,7 @@ func main() {
 	runs := flag.Bool("runs", false, "Run Runs Test")
 	longestRun := flag.Bool("longest-run", false, "Run Test for the Longest Run of Ones in a Block")
 	rank := flag.Bool("rank", false, "Run Binary Matrix Rank Test")
-	// dft := flag.Bool("dft", false, "Run Discrete Fourier Transform (Spectral) Test")
+	dft := flag.Bool("dft", false, "Run Discrete Fourier Transform (Spectral) Test")
 	// nonOverlappingTemplate := flag.Bool("non-overlapping-template", false, "Run Non-overlapping Template Matching Test")
 	// overlappingTemplate := flag.Bool("overlapping-template", false, "Run Overlapping Template Matching Test")
 	// universal := flag.Bool("universal", false, "Run Maurer's Universal Statistical Test")
@@ -96,6 +96,17 @@ func main() {
 	if *allTests || *rank {
 		fmt.Println("Running Binary Matrix Rank Test...")
 		p_val, isRandom, err := nist.Rank(bs)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("p-value: ", p_val)
+		fmt.Println("Is random: ", isRandom)
+	}
+
+	if *allTests || *dft {
+		fmt.Println("Running Discrete Fourier Transform (Spectral) Test...")
+		p_val, isRandom, err := nist.DFT(bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
