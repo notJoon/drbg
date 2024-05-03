@@ -6,6 +6,22 @@ import (
 	b "github.com/notJoon/drbg/bitstream"
 )
 
+// ref: A Statistical Test Suite for Random and Pseudorandom Number Generators for Cryptographic Application
+// Section 2.5 Binary Matrix Rank Test (p. 32)
+
+// Rank performs the Binary Matrix Rank Test on the given bitstream.
+// The purpose of this test is to check for linear dependence among fixed-length substrings of the original sequence.
+// The test constructs matrices from the input sequence and determines the rank of each matrix.
+// It then compares the rank distribution to the expected distribution for a random sequence.
+// Deviations from the expected distribution indicate non-randomness.
+//
+// The test proceeds as follows:
+//  1. Divide the input sequence into M = n/Q non-overlapping blocks of length Q, where n is the length of the input sequence.
+//  2. Construct a Q x Q matrix from each block by writing the bits in the block in row-major order.
+//  3. Determine the binary rank of each matrix using Gaussian elimination.
+//  4. Count the number of matrices with each rank (full rank, full rank-1, and other ranks).
+//  5. Compute the Chi-square statistic based on the observed and expected counts for each rank.
+//  6. Compute the p-value using the incomplete Gamma function.
 func Rank(bs *b.BitStream) (float64, bool, error) {
 	var (
 		M uint64 = 32 // number of rows in the matrix
