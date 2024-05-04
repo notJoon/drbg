@@ -28,7 +28,7 @@ func main() {
 	// specified the length of the substrting to test, in bits.
 	blockSize := flag.Uint64("block-size", 0, "The length in bits of the substring to be tested")
 
-	// universal := flag.Bool("universal", false, "Run Maurer's Universal Statistical Test")
+	universal := flag.Bool("universal", false, "Run Maurer's Universal Statistical Test")
 	// linearComplexity := flag.Bool("linear-complexity", false, "Run Linear Complexity Test")
 	// serial := flag.Bool("serial", false, "Run Serial Test")
 	// approximateEntropy := flag.Bool("approximate-entropy", false, "Run Approximate Entropy Test")
@@ -51,7 +51,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	bs, err := stream.FromFile(*filename)
+	var (
+		bs  *stream.BitStream
+		err error
+	)
+
+	// regulation of the bitstream
+	// ????
+	if *frequency {
+		bs, err = stream.FromFileWithLimit(*filename, 100)
+	} else {
+		bs, err = stream.FromFile(*filename)
+	}
+
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
@@ -81,7 +93,7 @@ func main() {
 		}
 	}
 	if *allTests || *blockFrequency {
-		p_val, isRandom, err := nist.BlockFrequencyTest(bs, 128)
+		p_val, isRandom, err := nist.BlockFrequencyTest(bs, uint64(100))
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
@@ -162,11 +174,11 @@ func main() {
 
 	if *allTests || *nonOverlappingTemplate {
 		if *templateB == "" {
-			fmt.Println("Error: template B is required for Non-overlapping Template Matching Test.\nUse -template \"001\" (or other tmeplate)")
+			fmt.Println("Error (non-overlapping template test): template B is required for Non-overlapping Template Matching Test.\nUse -template \"001\" (or other tmeplate)")
 			os.Exit(1)
 		}
 		if *blockSize == 0 {
-			fmt.Println("Error: block size is required for Non-overlapping Template Matching Test.\nUse -block-size 10 (or other block size)")
+			fmt.Println("Error (non-overlapping template test): block size is required for Non-overlapping Template Matching Test.\nUse -block-size 10 (or other block size)")
 			os.Exit(1)
 		}
 		B := make([]uint8, len(*templateB))
@@ -177,13 +189,13 @@ func main() {
 			case '1':
 				B[i] = 1
 			default:
-				fmt.Printf("Error: invalid character in template B: %c\n", c)
+				fmt.Printf("Error (non-overlapping template test): invalid character in template B: %c\n", c)
 				os.Exit(1)
 			}
 		}
 		p_value, isRandom, err := nist.NonOverlappingTemplateMatching(B, *blockSize, bs)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
+			fmt.Printf("Error (non-overlapping template test): %v\n", err)
 			os.Exit(1)
 		}
 
@@ -198,11 +210,11 @@ func main() {
 
 	if *allTests || *overlappingTemplate {
 		if *templateB == "" {
-			fmt.Println("Error: template B is required for Non-overlapping Template Matching Test.\nUse -template \"001\" (or other tmeplate)")
+			fmt.Println("Error (overlapping templelate test): template B is required for Non-overlapping Template Matching Test.\nUse -template \"001\" (or other tmeplate)")
 			os.Exit(1)
 		}
 		if *blockSize == 0 {
-			fmt.Println("Error: block size is required for Non-overlapping Template Matching Test.\nUse -block-size 10 (or other block size)")
+			fmt.Println("Error (overlapping templelate test): block size is required for Non-overlapping Template Matching Test.\nUse -block-size 10 (or other block size)")
 			os.Exit(1)
 		}
 		B := make([]uint8, len(*templateB))
@@ -213,13 +225,13 @@ func main() {
 			case '1':
 				B[i] = 1
 			default:
-				fmt.Printf("Error: invalid character in template B: %c\n", c)
+				fmt.Printf("Error (overlapping templelate test): invalid character in template B: %c\n", c)
 				os.Exit(1)
 			}
 		}
 		p_value, isRandom, err := nist.OverlappingTemplateMatching(B, *blockSize, bs)
 		if err != nil {
-			fmt.Printf("Error: %v\n", err)
+			fmt.Printf("Error (overlapping templelate test): %v\n", err)
 			os.Exit(1)
 		}
 
@@ -229,6 +241,22 @@ func main() {
 		} else {
 			fail++
 			t.AppendRow([]interface{}{"Overlapping Template Matching Test", p_value, "Fail"})
+		}
+	}
+
+	if *allTests || *universal {
+		p_val, isRandom, err := nist.UniversalRecommendedValues(bs)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		if isRandom {
+			pass++
+			t.AppendRow([]interface{}{"Maurer's Universal Statistical Test", p_val, "Pass"})
+		} else {
+			fail++
+			t.AppendRow([]interface{}{"Maurer's Universal Statistical Test", p_val, "Fail"})
 		}
 	}
 

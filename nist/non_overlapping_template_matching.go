@@ -60,7 +60,7 @@ func NonOverlappingTemplateMatching(B []uint8, eachBlockSize uint64, bs *b.BitSt
 	N := uint64(n) / M
 
 	if uint64(n)%M != 0 {
-		errorMessage := fmt.Sprintf("Input, eachBlockSize=%v, is wrong. %v mod %v remains %v", eachBlockSize, n, M, uint64(n)%M)
+		errorMessage := fmt.Sprintf("Invalid input: eachBlockSize=%v. It should be a multiple of %v, but %v mod %v gives a remainder of %v. Please provide an input that is a multiple of %v.", eachBlockSize, M, n, M, uint64(n)%M, M)
 		return 0, false, errors.New(errorMessage)
 	}
 

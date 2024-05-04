@@ -4,13 +4,13 @@ package nist
 
 import (
 	"errors"
+	"fmt"
 
 	b "github.com/notJoon/drbg/bitstream"
 )
 
 var (
 	ErrSequenceTooShort = errors.New("input sequence length should be at least 100 bits")
-	ErrInvalidBlockSize = errors.New("invalid block size M")
 )
 
 // piWithBaseI calculates the proportion πi of '1's in each M-bit block of the bitstream.
@@ -48,10 +48,11 @@ func piWithBaseI(bs *b.BitStream, M, N uint64) ([]float64, error) {
 func BlockFrequencyTest(bs *b.BitStream, M uint64) (float64, bool, error) {
 	n := uint64(bs.Len())
 	if n < 100 {
-		return 0, false, ErrSequenceTooShort
+		return 0, false, fmt.Errorf("input sequence length should be at least 100 bits, got %d", n)
 	}
 	if M < 20 || M <= n/100 {
-		return 0, false, ErrInvalidBlockSize
+		maxM := n / 100
+		return 0, false, fmt.Errorf("invalid block size. got %d, should be at least 20 and less than %d", M, maxM)
 	}
 
 	// partition the input sequence into N = floor(n/M) non-overlapping blocks

@@ -121,3 +121,39 @@ func FromFile(filename string) (*BitStream, error) {
 
 	return NewBitStream(data), nil
 }
+
+// FromFileWithLimit reads a file containing a list of numbers and returns a Bitstream.
+// It only reads the first 'limit' lines from the file.
+func FromFileWithLimit(filename string, limit int) (*BitStream, error) {
+    file, err := os.Open(filename)
+    if err != nil {
+        return nil, err
+    }
+    defer file.Close()
+
+    var data []byte
+    scanner := bufio.NewScanner(file)
+    lineCount := 0
+    for scanner.Scan() {
+        if lineCount >= limit {
+            break
+        }
+        line := scanner.Text()
+        if num, err := strconv.Atoi(line); err == nil {
+            if num <= 0xff {
+                data = append(data, byte(num))
+            } else {
+                data = append(data, byte(num>>8), byte(num&0xff))
+            }
+        } else {
+            return nil, err
+        }
+        lineCount++
+    }
+
+    if err := scanner.Err(); err != nil {
+        return nil, err
+    }
+
+    return NewBitStream(data), nil
+}

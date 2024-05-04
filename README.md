@@ -80,6 +80,8 @@ Evaluates the frequency of overlapping patterns, looking for deviations from exp
 
 > _Section 2.9 p.42_
 
+Minimum length of test case: 387,840
+
 Measures the complexity of data sequences to evaluate their randomness, assessing the sequence’s entropy and compression potential.
 
 ### Linear Complexity Test
