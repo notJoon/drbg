@@ -26,6 +26,14 @@ var (
 //
 // The function returns the P-value, the test result (whether the P-value is greater than or equal to 0.01),
 // and an error (if any occurred).
+//
+// Parameters:
+//   - B: The template to be searched for in the bitstream.
+//
+// Returns:
+//   - p_value: The p-value of the test.
+//   - bool: True if the test passes (p-value >= 0.01), False otherwise.
+//   - error: Any error that occurred during the test, such as invalid input parameters.
 func LongestRunOfOnes(bs *b.BitStream) (float64, bool, error) {
 	// Declare Constant
 	var (
@@ -36,9 +44,11 @@ func LongestRunOfOnes(bs *b.BitStream) (float64, bool, error) {
 		_PI_K6_M10000 = [7]float64{0.0882, 0.2092, 0.2483, 0.1933, 0.1208, 0.0675, 0.0727}
 	)
 
-	var M uint64 // The length of each block.
-	var N uint64 // The number of blocks; selected in accordance with the value of M.
-	var K uint64
+	var (
+		M uint64 // The length of each block.
+		N uint64 // The number of blocks; selected in accordance with the value of M.
+		K uint64
+	)
 
 	n := uint64(bs.Len())
 
@@ -63,8 +73,7 @@ func LongestRunOfOnes(bs *b.BitStream) (float64, bool, error) {
 	sliceBoundary_end := M
 	v := [7]uint64{0, 0, 0, 0, 0, 0, 0}
 	for {
-		var longest uint64 = 0
-		var count uint64 = 0
+		var longest, count uint64
 		for i := sliceBoundary_start; i < sliceBoundary_end; i++ {
 			bit, err := bs.Bit(int(i))
 			if err != nil {
@@ -134,8 +143,10 @@ func LongestRunOfOnes(bs *b.BitStream) (float64, bool, error) {
 	}
 
 	// (3) Compute Test Statistic and Reference Distribution χ^2
-	var chi_square float64 = 0
-	var i uint64
+	var (
+		chi_square float64
+		i          uint64
+	)
 	switch K {
 	case 3:
 		for i = 0; i <= K; i++ {
@@ -174,7 +185,7 @@ func LongestRunOfOnes(bs *b.BitStream) (float64, bool, error) {
 	}
 
 	// (4) Compute P-value
-	P_value := igamc(float64(K)/2.0, chi_square/2.0)
+	p_value := igamc(float64(K)/2.0, chi_square/2.0)
 
-	return P_value, P_value >= 0.01, nil
+	return p_value, p_value >= 0.01, nil
 }

@@ -37,6 +37,14 @@ func piWithBaseI(bs *b.BitStream, M, N uint64) ([]float64, error) {
 // BlockFrequencyTest performs the Frequency Test Within a Block as defined in NIST SP800-22.
 // It takes a BitStream and block size M as input and returns the P-value of the test,
 // a bool representing if the P-value suggests randomness (true if P >= 0.01), and an error if any.
+//
+// Parameters:
+//   - B: The template to be searched for in the bitstream.
+//
+// Returns:
+//   - p_value: The p-value of the test.
+//   - bool: True if the test passes (p-value >= 0.01), False otherwise.
+//   - error: Any error that occurred during the test, such as invalid input parameters.
 func BlockFrequencyTest(bs *b.BitStream, M uint64) (float64, bool, error) {
 	n := uint64(bs.Len())
 	if n < 100 {
@@ -64,7 +72,7 @@ func BlockFrequencyTest(bs *b.BitStream, M uint64) (float64, bool, error) {
 	X2 := 4 * float64(M) * tempSum
 
 	// compute the P-value using the incomplete gamma function complement
-	P_value := igamc(float64(N)/2.0, X2/2.0)
+	p_value := igamc(float64(N)/2.0, X2/2.0)
 
-	return P_value, P_value >= 0.01, nil
+	return p_value, p_value >= 0.01, nil
 }

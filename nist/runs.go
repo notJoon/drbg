@@ -9,6 +9,14 @@ import (
 
 // Runs function returns "The total number of runs" across all n bits.Runs
 // The total number ofruns + the total number of one-runs.
+//
+// Parameters:
+//   - B: The template to be searched for in the bitstream.
+//
+// Returns:
+//   - p_value: The p-value of the test.
+//   - bool: True if the test passes (p-value >= 0.01), False otherwise.
+//   - error: Any error that occurred during the test, such as invalid input parameters.
 func Runs(bs *b.BitStream) (float64, bool, error) {
 	n := uint64(bs.Len())
 	pi := 0.0
@@ -45,11 +53,6 @@ func Runs(bs *b.BitStream) (float64, bool, error) {
 		}
 	}
 
-	P_value := math.Erfc(math.Abs(V_n-2*float64(n)*pi*(1-pi)) / (2 * math.Sqrt(2.0*float64(n)) * pi * (1 - pi)))
-	return P_value, decisionRule(P_value, 0.01), nil
-}
-
-// decisionRule evaluates if the P-value indicates randomness
-func decisionRule(p, level float64) bool {
-	return p >= level
+	p_value := math.Erfc(math.Abs(V_n-2*float64(n)*pi*(1-pi)) / (2 * math.Sqrt(2.0*float64(n)) * pi * (1 - pi)))
+	return p_value, p_value >= 0.01, nil
 }

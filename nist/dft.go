@@ -17,6 +17,14 @@ import (
 // It then compares the peak heights (the moduli of the Fourier coefficients) to a threshold value.
 // If the number of peaks exceeding the threshold is significantly different from the expected number (95% of n/2),
 // the sequence is considered non-random.
+//
+// Parameters:
+//   - B: The template to be searched for in the bitstream.
+//
+// Returns:
+//   - p_value: The p-value of the test.
+//   - bool: True if the test passes (p-value >= 0.01), False otherwise.
+//   - error: Any error that occurred during the test, such as invalid input parameters.
 func DFT(bs *b.BitStream) (float64, bool, error) {
 	n := bs.Len()
 	X := make([]float64, 0, n/8)
@@ -46,23 +54,25 @@ func DFT(bs *b.BitStream) (float64, bool, error) {
 
 	// Compute N_0 = 0.95n/2
 	// N_0 is the expected theorertical (95%) number of peaks that are less than T.
-	N0 := 0.95 * float64(n) / 2
+	expectedPeaks := 0.95 * float64(n) / 2
 
 	// N_1 is the actual observed number of peaks in M that are less than T.
-	N1 := 0
+	observedPeaks := 0
 	for _, value := range M {
 		if value < T {
-			N1++
+			observedPeaks++
 		}
 	}
 
-	d := (float64(N1) - N0) / math.Sqrt(float64(n)*0.95*0.05/4)
+	d := (float64(observedPeaks) - expectedPeaks) / math.Sqrt(float64(n)*0.95*0.05/4)
 
 	p_value := math.Erfc(math.Abs(d) / math.Sqrt2)
 
 	return p_value, p_value >= 0.01, nil
 }
 
+// modulus calculates the modulus (absolute value) of the first half of the input sequence.
+// The modulus function produces a sequence of peak heights from the Fourier coefficients.
 func modulus(input []complex128) []float64 {
 	half := len(input) / 2
 	result := make([]float64, half)

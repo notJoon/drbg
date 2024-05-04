@@ -11,8 +11,6 @@ import (
 	"github.com/jedib0t/go-pretty/table"
 )
 
-// TODO: pretty print options with detailed output
-
 func main() {
 	allTests := flag.Bool("all", false, "Run all tests")
 
@@ -23,8 +21,8 @@ func main() {
 	rank := flag.Bool("rank", false, "Run Binary Matrix Rank Test")
 	dft := flag.Bool("dft", false, "Run Discrete Fourier Transform (Spectral) Test")
 
-	nonOverlappingTemplate := flag.Bool("non-overlapping-template", false, "Run Non-overlapping Template Matching Test")
-	overlappingTemplate := flag.Bool("overlapping-template", false, "Run Overlapping Template Matching Test")
+	nonOverlappingTemplate := flag.Bool("non-overlapping", false, "Run Non-overlapping Template Matching Test")
+	overlappingTemplate := flag.Bool("overlapping", false, "Run Overlapping Template Matching Test")
 	// specifies the template B to match. Must be string of ones and zeros (e.g. "001")
 	templateB := flag.String("template", "", "The template B to be matched (a string of ones and zeros)")
 	// specified the length of the substrting to test, in bits.

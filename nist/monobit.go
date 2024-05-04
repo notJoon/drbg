@@ -40,6 +40,14 @@ var (
 //
 // Returns the P-value of the test, a boolean indicating whether the sequence is considered
 // random, and an error if there is an issue with the input bitstream.
+//
+// Parameters:
+//   - B: The template to be searched for in the bitstream.
+//
+// Returns:
+//   - p_value: The p-value of the test.
+//   - bool: True if the test passes (p-value >= 0.01), False otherwise.
+//   - error: Any error that occurred during the test, such as invalid input parameters.
 func FrequencyTest(bs *b.BitStream) (float64, bool, error) {
 	n := bs.Len()
 	if n == 0 {
@@ -60,7 +68,7 @@ func FrequencyTest(bs *b.BitStream) (float64, bool, error) {
 	}
 
 	S_obs := math.Abs(float64(S_n)) / math.Sqrt(float64(n))
-	p_value := math.Erfc(S_obs / math.Sqrt(2))
+	p_value := math.Erfc(S_obs / math.Sqrt2)
 
 	isRandom := p_value >= 0.01
 	return p_value, isRandom, nil

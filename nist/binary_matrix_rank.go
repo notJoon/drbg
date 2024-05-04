@@ -22,6 +22,14 @@ import (
 //  4. Count the number of matrices with each rank (full rank, full rank-1, and other ranks).
 //  5. Compute the Chi-square statistic based on the observed and expected counts for each rank.
 //  6. Compute the p-value using the incomplete Gamma function.
+//
+// Parameters:
+//   - B: The template to be searched for in the bitstream.
+//
+// Returns:
+//   - p_value: The p-value of the test.
+//   - bool: True if the test passes (p-value >= 0.01), False otherwise.
+//   - error: Any error that occurred during the test, such as invalid input parameters.
 func Rank(bs *b.BitStream) (float64, bool, error) {
 	var (
 		M uint64 = 32 // number of rows in the matrix
@@ -75,7 +83,7 @@ func RankComputationOfBinaryMatrices(matrix [][]uint8) uint64 {
 	// Forward Application of Elementary Row Operations
 	// Declare Variables
 	var row, col int
-	var m int = len(matrix)
+	m := len(matrix)
 
 	// Step 1. Set i = 1
 	i := 0
@@ -86,8 +94,10 @@ func RankComputationOfBinaryMatrices(matrix [][]uint8) uint64 {
 	// If no row contains a “1” in this position, go to step 4.
 Forward_STEP2:
 	if matrix[i][i] == 0 {
-		var tempIndex int
-		var isContained bool = false
+		var (
+			tempIndex   int
+			isContained bool
+		)
 		for tempIndex = i; tempIndex < m; tempIndex++ {
 			if matrix[tempIndex][i] == 1 {
 				matrix[i], matrix[tempIndex] = matrix[tempIndex], matrix[i]
@@ -210,7 +220,7 @@ Backward_STEP_4:
 	// Step 5. Backward row operation complete.
 
 	// The rank of the matrix = the number of non-zero rows.
-	var rank uint64 = 0
+	rank := uint64(0)
 	for _, row := range matrix {
 		for _, eachValue := range row {
 			if eachValue == 1 {

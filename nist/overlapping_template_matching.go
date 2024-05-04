@@ -1,11 +1,27 @@
 package nist
 
 import (
+	"bytes"
 	"math"
 
 	b "github.com/notJoon/drbg/bitstream"
 )
 
+// OverlappingTemplateMatching performs the Overlapping Template Matching test from NIST SP-800-22.
+// It checks for the number of occurrences of a given template B in the input bitstream.
+// The bitstream is divided into N independent blocks of length M, and the test determines
+// whether the number of occurrences of B in each block is approximately what would be
+// expected for a random sequence.
+//
+// Parameters:
+//   - B: The template to be searched for in the bitstream.
+//   - eachBlockSize: The length of each independent block (M).
+//   - bs: The input bitstream.
+//
+// Returns:
+//   - p_value: The p-value of the test.
+//   - bool: True if the test passes (p-value >= 0.01), False otherwise.
+//   - error: Any error that occurred during the test, such as invalid input parameters.
 func OverlappingTemplateMatching(B []uint8, eachBlockSize uint64, bs *b.BitStream) (float64, bool, error) {
 	m := len(B)
 	n := bs.Len()
@@ -45,16 +61,13 @@ func OverlappingTemplateMatching(B []uint8, eachBlockSize uint64, bs *b.BitStrea
 	for _, block := range blocks {
 		numberOfOccurrence = 0
 		for bitPos := 0; bitPos <= len(block)-m; bitPos++ {
-			if isEqualBetweenBitsArray(block[bitPos:bitPos+m], B) {
+			if bytes.Equal(block[bitPos:bitPos+m], B) {
 				numberOfOccurrence++
 				if numberOfOccurrence >= 5 {
-					goto RECORD_V_ARRAY
+					v[numberOfOccurrence]++
 				}
 			}
 		}
-
-	RECORD_V_ARRAY:
-		v[numberOfOccurrence]++
 	}
 
 	// Compute values for λ, η
@@ -88,9 +101,17 @@ func OverlappingTemplateMatching(B []uint8, eachBlockSize uint64, bs *b.BitStrea
 	return p_value, p_value >= 0.01, nil
 }
 
+// Pr calculates the probability of observing u occurrences of the template
+// in a block of length M, given the expected number of occurrences (eta).
+//
+// Parameters:
+//   - u: The number of occurrences of the template.
+//   - eta: The expected number of occurrences of the template.
 func Pr(u int, eta float64) float64 {
-	var l int
-	var sum, p float64
+	var (
+		l      int
+		sum, p float64
+	)
 
 	if u == 0 {
 		p = math.Exp(-1 * eta)
@@ -106,18 +127,4 @@ func Pr(u int, eta float64) float64 {
 		p = sum
 	}
 	return p
-}
-
-func isEqualBetweenBitsArray(a, b []uint8) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := range b {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
-	return true
 }
