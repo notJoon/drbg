@@ -57,7 +57,7 @@ func array2BinaryInt(arr []uint8) uint64 {
 	index_T := uint64(0)
 
 	// divide into L-bits
-	for i := len(arr)-1; i >= 0; i-- {
+	for i := len(arr) - 1; i >= 0; i-- {
 		index_T += uint64(arr[i]) * digits
 		digits *= 2
 	}

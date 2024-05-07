@@ -7,9 +7,7 @@ import (
 	b "github.com/notJoon/drbg/bitstream"
 )
 
-var (
-	ErrEmptyBitStream = errors.New("empty bitstream")
-)
+var ErrEmptyBitStream = errors.New("empty bitstream")
 
 // FrequencyTest evaluates the randomness of a sequence of numbers ranging from 0 to 255,
 // which are read from a file and used as a bitstream. This function applies the monobit test,

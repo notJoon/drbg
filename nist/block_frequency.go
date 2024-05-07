@@ -9,9 +9,7 @@ import (
 	b "github.com/notJoon/drbg/bitstream"
 )
 
-var (
-	ErrSequenceTooShort = errors.New("input sequence length should be at least 100 bits")
-)
+var ErrSequenceTooShort = errors.New("input sequence length should be at least 100 bits")
 
 // piWithBaseI calculates the proportion πi of '1's in each M-bit block of the bitstream.
 // It returns a slice of float64 representing the proportion of '1's for each block

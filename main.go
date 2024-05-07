@@ -33,9 +33,12 @@ func main() {
 	linearComplexity := flag.Bool("linear", false, "Run Linear Complexity Test")
 	inputSize := flag.Uint64("m", 0, "The length of the block to be tested")
 
-	// serial := flag.Bool("serial", false, "Run Serial Test")
-	// approximateEntropy := flag.Bool("approximate-entropy", false, "Run Approximate Entropy Test")
-	// cusum := flag.Bool("cusum", false, "Run Cumulative Sums (Cusums) Test")
+	serial := flag.Bool("serial", false, "Run Serial Test")
+	approximateEntropy := flag.Bool("entropy", false, "Run Approximate Entropy Test")
+
+	cusum := flag.Bool("cusum", false, "Run Cumulative Sums (Cusums) Test")
+	mode := flag.Int("mode", 0, "The mode of the test (0 or 1)")
+
 	// randomExcursions := flag.Bool("random-excursions", false, "Run Random Excursions Test")
 	// randomExcursionsVariant := flag.Bool("random-excursions-variant", false, "Run Random Excursions Variant Test")
 
@@ -280,6 +283,53 @@ func main() {
 		} else {
 			fail++
 			t.AppendRow([]interface{}{"Linear Complexity Test", p_val, "Fail"})
+		}
+	}
+
+	if *allTests || *serial {
+		p_val, isRandom, err := nist.Serial(10, bs)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		if isRandom != nil {
+			pass++
+			t.AppendRow([]interface{}{"Serial Test", p_val, "Pass"})
+		} else {
+			fail++
+			t.AppendRow([]interface{}{"Serial Test", p_val, "Fail"})
+		}
+	}
+
+	if *allTests || *approximateEntropy {
+		p_val, isRandom, err := nist.ApproximateEntropy(15, bs)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		if isRandom {
+			pass++
+			t.AppendRow([]interface{}{"Approximate Entropy Test", p_val, "Pass"})
+		} else {
+			fail++
+			t.AppendRow([]interface{}{"Approximate Entropy Test", p_val, "Fail"})
+		}
+	}
+
+	if *allTests || *cusum {
+		p_val, isRandom, err := nist.CumulativeSums(*mode, bs)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
+
+		if isRandom {
+			pass++
+			t.AppendRow([]interface{}{"Approximate Entropy Test", p_val, "Pass"})
+		} else {
+			fail++
+			t.AppendRow([]interface{}{"Approximate Entropy Test", p_val, "Fail"})
 		}
 	}
 
