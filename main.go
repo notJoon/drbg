@@ -15,9 +15,12 @@ func main() {
 	allTests := flag.Bool("all", false, "Run all tests")
 
 	frequency := flag.Bool("frequency", false, "Run Frequency (Monobit) Test")
-	blockFrequency := flag.Bool("block", false, "Run Frequency Test within a Block")
+	blockFrequency := flag.Bool("block-frequency", false, "Run Frequency Test within a Block")
+	blockFrequencyBlockSize := flag.Uint64("frequency-block-size", 128, "The length in bits of the substring to be tested")
+
 	runs := flag.Bool("runs", false, "Run Runs Test")
 	longestRun := flag.Bool("longest-run", false, "Run Test for the Longest Run of Ones in a Block")
+
 	rank := flag.Bool("rank", false, "Run Binary Matrix Rank Test")
 	dft := flag.Bool("dft", false, "Run Discrete Fourier Transform (Spectral) Test")
 
@@ -33,8 +36,11 @@ func main() {
 	linearComplexity := flag.Bool("linear", false, "Run Linear Complexity Test. Default block size is 500 bits.")
 	inputSize := flag.Uint64("m", 500, "The length of the block to be tested")
 
-	serial := flag.Bool("serial", false, "Run Serial Test")
+	serial := flag.Bool("serial", false, "Run Serial Test. Default block size is 16 bits.")
+	serialBlockSize := flag.Uint64("serial-size", 16, "The length in bits of the substring to be tested")
+
 	approximateEntropy := flag.Bool("entropy", false, "Run Approximate Entropy Test")
+	approximateEntropyBlockSize := flag.Uint64("entropy-block-size", 10, "The length in bits of the substring to be tested")
 
 	cusum := flag.Bool("cusum", false, "Run Cumulative Sums (Cusums) Test. Default mode is 0 (forward).")
 	mode := flag.Int("mode", 0, "The mode of the test (0 or 1)")
@@ -95,7 +101,7 @@ func main() {
 	}
 	if *allTests || *blockFrequency {
 		testName := "Frequency Test within a Block"
-		p_val, isRandom, err := nist.BlockFrequencyTest(bs, uint64(100))
+		p_val, isRandom, err := nist.BlockFrequencyTest(bs, uint64(*blockFrequencyBlockSize))
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
@@ -210,7 +216,7 @@ func main() {
 		writeResult(t, testName, p_value, isRandom, &pass, &fail)
 	}
 
-	if *allTests || *universal {
+	if *universal {
 		testName := "Maurer's Universal Statistical Test"
 		p_val, isRandom, err := nist.UniversalRecommendedValues(bs)
 		if err != nil {
@@ -238,7 +244,7 @@ func main() {
 
 	if *allTests || *serial {
 		testName := "Serial Test"
-		p_val, isRandom, err := nist.Serial(10, bs)
+		p_val, isRandom, err := nist.Serial(*serialBlockSize, bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)
@@ -255,7 +261,7 @@ func main() {
 
 	if *allTests || *approximateEntropy {
 		testName := "Approximate Entropy Test"
-		p_val, isRandom, err := nist.ApproximateEntropy(15, bs)
+		p_val, isRandom, err := nist.ApproximateEntropy(*approximateEntropyBlockSize, bs)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)

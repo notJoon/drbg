@@ -11,8 +11,6 @@ func ApproximateEntropy(m uint64, bs *b.BitStream) (float64, bool, error) {
 	n := uint64(bs.Len())
 	var psi [2]float64
 
-	println(n)
-
 	for indexPsi := range psi {
 		appendedEpsilon := make([]uint8, n+m-1)
 		for i := uint64(0); i < n; i++ {
@@ -56,14 +54,13 @@ func ApproximateEntropy(m uint64, bs *b.BitStream) (float64, bool, error) {
 				sum += value * math.Log(value)
 			}
 		}
-		println(sum)
 		psi[indexPsi] = sum
 		m++
 	}
 	m--
 
 	chi2 := 2 * float64(n) * (math.Log(2) - (psi[0] - psi[1]))
-	p_val := igamc(math.Pow(2.0, float64(m-1)), chi2/2.0)
+	p_val := igamc(math.Pow(2.0, float64(m-1)), chi2/2)
 
-	return chi2, p_val > 0.01, nil
+	return p_val, p_val > 0.01, nil
 }
