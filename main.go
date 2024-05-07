@@ -29,7 +29,10 @@ func main() {
 	blockSize := flag.Uint64("block-size", 0, "The length in bits of the substring to be tested")
 
 	universal := flag.Bool("universal", false, "Run Maurer's Universal Statistical Test")
-	// linearComplexity := flag.Bool("linear-complexity", false, "Run Linear Complexity Test")
+
+	linearComplexity := flag.Bool("linear", false, "Run Linear Complexity Test")
+	inputSize := flag.Uint64("m", 0, "The length of the block to be tested")
+
 	// serial := flag.Bool("serial", false, "Run Serial Test")
 	// approximateEntropy := flag.Bool("approximate-entropy", false, "Run Approximate Entropy Test")
 	// cusum := flag.Bool("cusum", false, "Run Cumulative Sums (Cusums) Test")
@@ -257,6 +260,26 @@ func main() {
 		} else {
 			fail++
 			t.AppendRow([]interface{}{"Maurer's Universal Statistical Test", p_val, "Fail"})
+		}
+	}
+
+	if *allTests || *linearComplexity {
+		if *inputSize < 500 || *inputSize > 5000 {
+			fmt.Println("Error: input size must be between 500 and 5000")
+			os.Exit(1)
+		}
+		p_val, isRandom, err := nist.LinearComplexity(*inputSize, bs)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			os.Exit(1)
+		}
+
+		if isRandom {
+			pass++
+			t.AppendRow([]interface{}{"Linear Complexity Test", p_val, "Pass"})
+		} else {
+			fail++
+			t.AppendRow([]interface{}{"Linear Complexity Test", p_val, "Fail"})
 		}
 	}
 
